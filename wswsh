@@ -34,6 +34,7 @@ function get_structure {
 
 function def_regex {
 	# Extensible part...
+	WSH_META_PRE=1
 	case $WSH_INTERP in
 		ahrf*)
 			WSH_PAT="^[\t ]*:"
@@ -42,6 +43,7 @@ function def_regex {
 		*)
 			WSH_PAT="<h1>"
 			WSH_REG="^[\t ]*<h1>[\t ]*|[\t ]*<\/h1>.*$"
+			WSH_META_PRE=0
 			;;
 	esac
 }
@@ -55,8 +57,17 @@ function run_hook {
 	fi
 }
 
+function get_meta {
+	if [[ "$WSH_META_PRE" -eq 1 ]]; then
+		src=$(<"$WSH_GENF")
+	else
+		src="$WSH_GENF_TMP"
+	fi
+	WSH_GENF_TITLE="$(awk '/'"$WSH_PAT"'/{gsub(/'"$WSH_REG"'/,"");print $0;exit}' <<<"$src")"
+}
+
 function gen_page {
-	typeset WSH_GENF WSH_GENF_NOSRC WSH_GENF_FINAL WSH_GENF_TITLE
+	typeset WSH_GENF WSH_GENF_NOSRC WSH_GENF_TMP WSH_GENF_FINAL WSH_GENF_TITLE
 
 	if [[ -n $WSH_INTERP && ! -x $(whence -p $WSH_INTERP) ]]; then
 		prynt_err "$WSH_INTERP not found"
@@ -74,13 +85,14 @@ function gen_page {
 	find "src" -type f -iname "*.${WSH_EXT:-txt}" | while IFS=$'\n' read -r WSH_GENF; do
 		WSH_GENF_NOSRC="${WSH_GENF#*/}"
 		WSH_GENF_FINAL="dest/${WSH_GENF_NOSRC%%.*}.html"
-		WSH_GENF_TITLE="$(awk '/'"$WSH_PAT"'/{gsub(/'"$WSH_REG"'/,"");print $0;exit}' "$WSH_GENF")"
 
 		run_hook pre_genpage
-		page_header >"$WSH_GENF_FINAL"
-		if ! "${WSH_INTERP:-cat}" "$WSH_GENF" >>"$WSH_GENF_FINAL"; then
+		if ! WSH_GENF_TMP=$("${WSH_INTERP:-cat}" "$WSH_GENF"); then
 			prynt_err "Generating $WSH_GENF failed"
 		fi
+		get_meta
+		page_header >"$WSH_GENF_FINAL"
+		print "$WSH_GENF_TMP" >>"$WSH_GENF_FINAL"
 		page_footer >>"$WSH_GENF_FINAL"
 		run_hook post_genpage
 
