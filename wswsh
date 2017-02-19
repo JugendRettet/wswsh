@@ -90,7 +90,7 @@ function gen_page {
 		if ! WSH_GENF_TMP=$("${WSH_INTERP:-cat}" "$WSH_GENF"); then
 			prynt_err "Generating $WSH_GENF failed"
 		fi
-		get_meta
+		WSH_GENF_TMP="$WSH_GENF_TMP" get_meta
 		page_header >"$WSH_GENF_FINAL"
 		print "$WSH_GENF_TMP" >>"$WSH_GENF_FINAL"
 		page_footer >>"$WSH_GENF_FINAL"
