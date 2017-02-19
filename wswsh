@@ -63,7 +63,7 @@ function get_meta {
 	else
 		src="$WSH_GENF_TMP"
 	fi
-	WSH_GENF_TITLE="$(awk '/'"$WSH_PAT"'/{gsub(/'"$WSH_REG"'/,"");print $0;exit}' <<<"$src")"
+	WSH_GENF_TITLE="$(awk '/'"$WSH_PAT"'/{gsub(/'"$WSH_REG"'/,"");gsub(/<\/?[a-z]+>/,"");print $0;exit}' <<<"$src")"
 }
 
 function gen_page {
