@@ -68,7 +68,7 @@ function get_meta {
 }
 
 function gen_page {
-	typeset WSH_GENF WSH_GENF_NOSRC WSH_GENF_TMP WSH_GENF_FINAL WSH_GENF_TITLE
+	typeset WSH_GENF WSH_GENF_NOSRC WSH_PAGE WSH_GENF_TMP WSH_GENF_FINAL WSH_GENF_TITLE
 
 	if [[ -n $WSH_INTERP && ! -x $(whence -p $WSH_INTERP) ]]; then
 		prynt_err "$WSH_INTERP not found"
@@ -86,13 +86,14 @@ function gen_page {
 	find "src" -type f -iname "*.${WSH_EXT:-txt}" | while IFS=$'\n' read -r WSH_GENF; do
 		WSH_GENF_NOSRC="${WSH_GENF#*/}"
 		WSH_GENF_FINAL="dest/${WSH_GENF_NOSRC%%.*}.html"
+		WSH_PAGE="${WSH_GENF_NOSRC%%.*}"
 
 		run_hook pre_genpage
 		if ! WSH_GENF_TMP=$("${WSH_INTERP:-cat}" "$WSH_GENF"); then
 			prynt_err "Generating $WSH_GENF failed"
 		fi
 		WSH_GENF_TMP="$WSH_GENF_TMP" get_meta
-		page_header >"$WSH_GENF_FINAL"
+		WSH_PAGE="${WSH_PAGE}" page_header >"$WSH_GENF_FINAL"
 		print "$WSH_GENF_TMP" >>"$WSH_GENF_FINAL"
 		page_footer >>"$WSH_GENF_FINAL"
 		run_hook post_genpage
