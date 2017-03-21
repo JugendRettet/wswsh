@@ -42,8 +42,8 @@ function def_regex {
 			WSH_REG="^[\t ]*:[\t ]*|[\t ]*:[\t ]*$"
 			;;
 		*)
-			WSH_PAT="<h1(\ name=\".*\")?>"
-			WSH_REG="^[\t ]*<h1(\ name=\".*\")?>[\t ]*|[\t ]*<\/h1>.*$"
+			WSH_PAT="<h1(\ id=\".*\")?>"
+			WSH_REG="^[\t ]*<h1(\ id=\".*\")?>[\t ]*|[\t ]*<\/h1>.*$"
 			WSH_META_PRE=0
 			;;
 	esac
